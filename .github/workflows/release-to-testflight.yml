@@ -1,0 +1,49 @@
+name: Release to TestFlight
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_release:
+        description: 'Run the release lane after build (true/false)'
+        required: false
+        default: 'true'
+  schedule:
+    # Weekly check — workflow will only run if you add the required secrets in repository Settings → Secrets
+    - cron: '0 12 * * 1'
+
+jobs:
+  build-and-release:
+    runs-on: macos-latest
+    env:
+      TEAMID: ${{ secrets.TEAMID }}
+      GH_PAT: ${{ secrets.GH_PAT }}
+      FASTLANE_KEY_ID: ${{ secrets.FASTLANE_KEY_ID }}
+      FASTLANE_ISSUER_ID: ${{ secrets.FASTLANE_ISSUER_ID }}
+      FASTLANE_KEY: ${{ secrets.FASTLANE_KEY }}
+      GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Setup Ruby and Bundler
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.x'
+          bundler-cache: true
+
+      - name: Install dependencies
+        run: |
+          bundle install --jobs 4 --retry 3
+
+      - name: Build with fastlane
+        run: |
+          bundle exec fastlane build_loop
+
+      - name: Upload to TestFlight (fastlane release)
+        if: ${{ github.event.inputs.run_release == 'true' || github.event_name == 'schedule' }}
+        run: |
+          bundle exec fastlane release
