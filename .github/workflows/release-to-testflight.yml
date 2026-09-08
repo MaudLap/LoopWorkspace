@@ -34,9 +34,7 @@ jobs:
         with:
           ruby-version: '2.7'
           bundler-cache: true
-
-      - name: Install bundler 4.0.12
-        run: gem install bundler:4.0.12
+          bundler-version: '4.0.12'
 
       - name: Install dependencies
         run: |
