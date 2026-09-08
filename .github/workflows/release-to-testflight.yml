@@ -32,9 +32,8 @@ jobs:
       - name: Setup Ruby and Bundler
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '2.7'
+          ruby-version: '3.2'
           bundler-cache: true
-          bundler-version: '4.0.12'
 
       - name: Install dependencies
         run: |
